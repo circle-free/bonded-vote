@@ -40,7 +40,7 @@ contract BondedVote {
 
     function withdraw(address payable destination) public {
         Account storage account = accounts[msg.sender];
-        assert(block.number >= account.unlockBlock);    // account's amount must not be staked to any proposal votes
+        assert(block.number > account.unlockBlock);    // account's amount must not be staked to any proposal votes
 
         uint256 value = account.balance;
         account.balance = 0;                            // all or nothing ETH withrdrawal (in wei), before transfer to prevent reentrancy
@@ -51,7 +51,7 @@ contract BondedVote {
     }
 
     function createProposal(uint256 deadline, uint256 options, bytes32 descriptionDigest) public {
-        assert(deadline > block.number);                // deadline must be at least current block
+        assert(deadline >= block.number);               // deadline must be at least current block (maybe the create and votes all make it in one block)
         assert(options > 0);                            // the proposal must have at least 1 option
         uint256 proposalId = proposalCount++;           // note that proposalId = proposalCount, then proposalCount is incremented
 
@@ -68,7 +68,7 @@ contract BondedVote {
         uint256 proposalDeadline = proposal.deadline;   // keep a copy to save on SLOAD as deadline will be reused later on
 
         assert(proposalId < proposalCount)              // prevent voting on non-initialized proposals (cheaper than assert(proposals[proposalId].options))
-        assert(block.number < proposalDeadline);        // note that block.number is the parent of the block this transaction will be included in
+        assert(block.number <= proposalDeadline);
         assert(optionId < proposal.options);            // prevent the vote frombeing cast on an unavailable option
 
         bytes32 voteKey = getVoteKey(msg.sender, proposalId);                           // get the unique vote key for this account-proposal combination
