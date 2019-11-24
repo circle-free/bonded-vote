@@ -1,0 +1,28 @@
+{
+  "name": "bonded-vote",
+  "version": "1.0.0",
+  "description": "An on-chain bonded vote mechanism, that requires Ether to be bonded for the length of a proposal's voting window. This allows the on-chain vote tally to be accrued with each vote, to be accurate, permanent, and, unlike a carbon vote, to be computed and queried on-chain. No off-chain queries or computations (looped or otherwise), are needed. Further, by supporting a indefinite number or proposals, and bonding an account's Ether for the duration of the longest proposal it has participated in, this ensures Ether bonded for voting in one proposal can be used to vote in another proposal.",
+  "main": "",
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile --all",
+    "lint": "solium -d contracts",
+    "prettier": "prettier --write contracts/*.sol"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/circle-free/bonded-vote.git"
+  },
+  "author": "circle-free",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/circle-free/bonded-vote/issues"
+  },
+  "homepage": "https://github.com/circle-free/bonded-vote#readme",
+  "devDependencies": {
+    "ethlint": "^1.2.5",
+    "prettier": "^1.19.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.34",
+    "truffle": "^5.1.1"
+  }
+}
