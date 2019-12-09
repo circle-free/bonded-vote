@@ -5,10 +5,15 @@ contract BondManager {
   function processBond(address, uint256, address) public;
 }
 
-contract MultiVote {
+contract IdentityManager {
+  function canVote(address) public view returns (bool);
+}
+
+contract QuadraticVote {
   event VoteCounted(address indexed account, uint256 indexed option, uint256 indexed amount);
 
   BondManager public bondManager;
+  IdentityManager public identityManager;
 
   address public asset; // token contract of the underlying expected bond (address(0) for ETH)
   uint256 public deadline; // deadline to vote on this proposal
@@ -24,7 +29,8 @@ contract MultiVote {
     uint256 _options,
     uint256 _deadline,
     bytes32 _descriptionDigest,
-    address _asset
+    address _asset,
+    address _identityManager
   ) public {
     assert(_options > uint256(0)); // the proposal must have at least 1 option
     assert(_deadline > block.number); // deadline must be at greater than current block
@@ -32,13 +38,16 @@ contract MultiVote {
     asset = _asset;
     deadline = _deadline;
     descriptionDigest = _descriptionDigest;
+    identityManager = IdentityManager(_identityManager);
     options = _options;
   }
 
-  function processVote(uint256[] memory optionIds, uint256[] memory votes) public {
+  function processVote(uint256[] memory optionIds, uint256[] memory votes, uint256[] memory amounts) public {
     assert(optionIds.length == votes.length); // ensure arguments are valid
+    assert(amounts.length == votes.length); // ensure arguments are valid
     assert(block.number <= deadline); // prevent voting after the deadline
     assert(records[msg.sender] == uint256(0)); // account must not have already voted
+    assert(identityManager.canVote(msg.sender)) // check voter against external Identity Validator
 
     bondManager.processBond(msg.sender, deadline, asset); // try to bond the account that is voting
     (uint256 allotted, ) = bondManager.accounts(msg.sender); // get account's current bonded balance
@@ -52,7 +61,8 @@ contract MultiVote {
         assert(optionIds[i] > optionIds[i - 1]); // optionIds must be in order, to prevent duplicates
       }
 
-      uint256 newTotal = total + votes[i];
+      assert(votes**2 == amounts[i]); // ensure votes for option is square root of amount
+      uint256 newTotal = total + amounts[i];
       assert(newTotal > total); // prevent overflow
       total = newTotal;
 
@@ -66,7 +76,7 @@ contract MultiVote {
       emit VoteCounted(msg.sender, optionIds[i], votes[i]);
     }
 
-    assert(total <= allotted); // prevent voting more than was bonded
+    assert(total <= allotted); // prevent voting more than was bonded, sum of all squared option vote votes
 
     leading = leadingId; // save local leading id to storage
   }

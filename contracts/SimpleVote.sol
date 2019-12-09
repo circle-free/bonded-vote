@@ -1,16 +1,12 @@
 pragma solidity >=0.5.0 <0.7.0;
 
 contract BondManager {
-  function accounts(address) public returns (uint256, uint256);
+  function accounts(address) public view returns (uint256, uint256);
   function processBond(address, uint256, address) public;
 }
 
 contract SimpleVote {
-  event VoteCounted(
-    address indexed account,
-    uint256 indexed option,
-    uint256 indexed amount
-  );
+  event VoteCounted(address indexed account, uint256 indexed option, uint256 indexed amount);
 
   BondManager public bondManager;
 

@@ -2,29 +2,14 @@ pragma solidity >=0.5.0 <0.7.0;
 
 contract ERC20 {
   function transfer(address recipient, uint256 amount) public returns (bool);
-  function transferFrom(address sender, address recipient, uint256 amount)
-    public
-    returns (bool);
+  function transferFrom(address sender, address recipient, uint256 amount) public returns (bool);
 }
 
 contract EthBondManager {
-  event DepositMade(
-    address indexed account,
-    address indexed token,
-    uint256 indexed amount
-  );
-  event WithdrawalMade(
-    address indexed account,
-    address indexed token,
-    uint256 indexed amount,
-    address destination
-  );
+  event DepositMade(address indexed account, address indexed token, uint256 indexed amount);
+  event WithdrawalMade(address indexed account, address indexed token, uint256 indexed amount, address destination);
   event AllowProposal(address indexed account, address indexed proposal);
-  event BondProcessed(
-    address indexed account,
-    address indexed proposal,
-    address indexed token
-  );
+  event BondProcessed(address indexed account, address indexed proposal, address indexed token);
 
   struct Account {
     uint256 balance; // an account's total withdrawable balance (sum of deposits since last withdrawal)
@@ -34,11 +19,7 @@ contract EthBondManager {
   mapping(bytes32 => Account) public accounts;
   mapping(bytes32 => bool) public approvals; // used to check if an account has approved its participation in a proposal
 
-  function getAddressAddressKey(address addr1, address addr2)
-    public
-    pure
-    returns (bytes32)
-  {
+  function getAddressAddressKey(address addr1, address addr2) public pure returns (bytes32) {
     return sha256(abi.encodePacked(addr1, addr2));
   }
 
@@ -71,11 +52,7 @@ contract EthBondManager {
     emit AllowProposal(msg.sender, proposal);
   }
 
-  function processBond(
-    address accountAddress,
-    uint256 unlockBlock,
-    address token
-  ) public {
+  function processBond(address accountAddress, uint256 unlockBlock, address token) public {
     assert(approvals[getAddressAddressKey(accountAddress, msg.sender)]); // calling proposal can only deal with participating accounts
 
     bytes32 accountKey = getAddressAddressKey(accountAddress, token);
